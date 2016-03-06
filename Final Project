@@ -1,1 +1,24 @@
-def a:
+Yifang Chen, Xiaowen Yang
+CSE 160
+Mar 6th 2016
+Final Project
+
+import matplotlib.pyplot as plt
+import csv
+
+def read_file(filename):
+  input_csv = open(filename)
+  input_dict = csv.DictReader(input_csv)
+  return input_dict
+
+def group_up(input_dict, keyword, requirement):
+  result = []
+  for items in input_dict:
+    if items[KEYWORD_IN] == keyword:
+      result.append(items[requirement])
+  return result
+  
+assert len(result) <= 400
+
+def main():
+  input_file = read_file("ScriptData.csv")
