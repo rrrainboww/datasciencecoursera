@@ -18,6 +18,20 @@ def group_up(input_dict, keyword, requirement):
       result.append(items[requirement])
   return result
   
+result_dict = {"less than 3 months": 0, "3-5 months": 0, "6-8 months": 0, "9-11 months":0, "more than a year": 0}
+for items in requirement_list:
+    if "days" or "1 months" or "2 months" in items:
+        result_dict["less than 3 months"] += 1
+    elif "3 months" or "4 months" or "5 months" in items:
+        result_dict['3-5 months'] += 1
+    elif "6 months" or "7 months" or "8 months" in items:
+        result_dict['6-8 months'] += 1
+    elif "9 months" or "10 months" or "11 months" in items:
+        result_dict['9-11 months'] += 1
+    else:
+        result_dict['more than a year'] += 1
+print result_dict
+  
 assert len(result) <= 400
 
 def main():
