@@ -1,38 +1,50 @@
-Yifang Chen, Xiaowen Yang
-CSE 160
-Mar 6th 2016
-Final Project
+# Yifang Chen, Xiaowen Yang
+# CSE 160
+# Mar 6th 2016
+# Final Project
 
 import matplotlib.pyplot as plt
 import csv
 
 def read_file(filename):
-  input_csv = open(filename)
-  input_dict = csv.DictReader(input_csv)
-  return input_dict
+    input_csv = open(filename)
+    input_dict = csv.DictReader(input_csv)
+    return input_dict
 
 def group_up(input_dict, keyword, requirement):
-  result = []
-  for items in input_dict:
-    if items[KEYWORD_IN] == keyword:
-      result.append(items[requirement])
-  return result
-  
-result_dict = {"less than 3 months": 0, "3-5 months": 0, "6-8 months": 0, "9-11 months":0, "more than a year": 0}
-for items in requirement_list:
-    if "days" or "1 months" or "2 months" in items:
-        result_dict["less than 3 months"] += 1
-    elif "3 months" or "4 months" or "5 months" in items:
-        result_dict['3-5 months'] += 1
-    elif "6 months" or "7 months" or "8 months" in items:
-        result_dict['6-8 months'] += 1
-    elif "9 months" or "10 months" or "11 months" in items:
-        result_dict['9-11 months'] += 1
-    else:
-        result_dict['more than a year'] += 1
-print result_dict
-  
-assert len(result) <= 400
+    result = []
+    for items in input_dict:
+        if items["KEYWORD_IN"] == keyword:
+            result.append(items[requirement])
+    return result
+
+def sort_time_period(time_list): 
+    result_dict = {"less than 3 months": 0, "4-6 months": 0, "7-9 months": 0, "10-12 months":0, "more than a year": 0}
+    for items in time_list:
+        items = items.replace('ago', '')
+        items = items.replace('about', '')
+        #items = items.replace('month', 'months')
+        items = items.replace('day', 'days')
+        items = items.replace(' ', '_')
+        if "over_1_year" == items:
+            result_dict['more than a year'] += 1
+        elif "10_months" == items or "11_months" == items  or "12_months" == items:
+            result_dict['10-12 months'] += 1
+        elif "7_months" == items or "8_months" == items or "9_months" == items:
+            result_dict['7-9 months'] += 1
+        elif "4_months" == items or "5_months" == items or "6_months" == items:
+            result_dict['4-6 months'] += 1
+        else:
+            result_dict["less than 3 months"] += 1
+    return result_dict
+#    print result_dict
+        
 
 def main():
-  input_file = read_file("ScriptData.csv")
+    input_file = read_file("ScriptData.csv")
+    
+    assert len(group_up(input_file, "KEYWORD_IN", "LOCATION")) <= 400
+    assert sort_time_period(['days', '1 months', '8 months']) == {"less than 3 months": 2, "4-6 months": 0, "7-9 months": 1, "10-12 months":0, "more than a year": 0}
+  
+if __name__ == "__main__":
+    main()
