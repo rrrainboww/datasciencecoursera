@@ -7,55 +7,17 @@ import matplotlib.pyplot as plt
 import csv
 from operator import itemgetter
 
-class Job:
+def read_csv(filename):
+    input_dict = csv.DictReader(open(filename))
+    return input_dict
     
-    def __init__(self, keyword):
-        self.key = keyword
-        self.input_dict = csv.DictReader(open("ScriptData.csv"))
-        self.keywords = []
-        
-        for items in self.input_dict:
-            if items["KEYWORD_IN"] == keyword:
-                self.keywords.append(items)
-
-    def group(self, requirement):
-        result = []
-        for items in self.keywords:
-            result.append(items[requirement])
-        return result
-          
-    def plot_location(self, location_list):
-        location_rank_list = self.rank_location(location_list)
-        print location_rank_list
-        x = [i for i in range(len(location_rank_list))]
-        x_value = [name[0] for name in location_rank_list]
-        y_value = [name[1] for name in location_rank_list]
-        plt.xticks(x, x_value)
-        plt.plot(x, y_value)
-        plt.legend([self.key])
-        plt.xlabel('State')
-        plt.ylabel('Frequency')
-        plt.savefig(self.key + 'location_rank.png')
-        plt.show()
-        
+def group_up(input_dict, keyword, requirement):
+    result_list = [items[requirement] for items in input_dict if items['KEYWORD_IN'] == keyword and items[requirement] != '']
+#    print result_list[153]
+    return result_list
     
-    def rank_location(self, location_list):
-        state_frequency = {}
-        for location in location_list:
-            location = location.split(',')
-            state_frequency.setdefault(location[len(location) - 1], 0)
-            state_frequency[location[len(location) - 1]] += 1
-        sorted_by_frequency = sorted(state_frequency.items(), key = itemgetter(1), reverse = True)
-        return sorted_by_frequency
-        
-job = Job('BIG DATA')
-#print job.keywords
-groups = job.group('LOCATION')
-job.plot_location(groups)
-
-
 def sort_time_period(time_list): 
-    result_dict = {"1 to 5 days": 0, "6 to 10 days": 0, "11 to 15 days": 0, "16 to 20 days":0, "21 to 25 days": 0, "26 to 30 days":0}
+    result_list = [0] * 6
     #time_range1 = [1,5,10,15,20,25]
     #time_range2 = [6,11,16,21,26,31]
     days_list = []
@@ -66,17 +28,65 @@ def sort_time_period(time_list):
             days_list.append(int(i[0]))
     
     for times in days_list:
-        if 0 < times < 6:
-            result_dict["1 to 5 days"] += 1
-        elif 5 < times < 11:
-            result_dict["6 to 10 days"] += 1
-        elif 10 < times < 16:
-            result_dict["11 to 15 days"] += 1
-        elif 15 < times < 21:
-            result_dict["16 to 20 days"] += 1
-        elif 20 < times < 26:
-            result_dict["21 to 25 days"] += 1
-        else:
-            result_dict["26 to 30 days"] += 1
-    return result_dict
+        result_list[(times - 1) / 5] += 1
+    return result_list
     
+def plot_time(lists_of_times, keywords):
+    x_axis = ["1 to 5 days", "6 to 10 days", "11 to 15 days", "16 to 20 days", "21 to 25 days", "26 to 30 days"]
+    x = [i for i in range(6)]
+    plt.xticks(x, x_axis)
+    for i in range(len(lists_of_times)):
+#        plt.clf()
+        y_value = [num for num in lists_of_times[i]]
+        plt.plot(x, y_value)
+        plt.legend([keywords[i]])
+        plt.xlabel('5_day_period')
+        plt.ylabel('Frequency of jobs')
+        plt.savefig(keywords[i] + ' time_rank.png')
+      
+def plot_location(location_list, keyword):
+    location_rank_list = rank_location(location_list)
+#    print location_rank_list[0:10]
+    x = [i for i in range(10)]
+    x_value = [name[0] for name in location_rank_list[0:10]]
+    y_value = [name[1] for name in location_rank_list[0:10]]
+    plt.xticks(x, x_value)
+    plt.plot(x, y_value)
+    plt.legend([keyword])
+    plt.xlabel('State')
+    plt.ylabel('Frequency')
+    plt.savefig(keyword + 'location_rank.png')
+#    plt.show()
+    
+
+def rank_location(location_list):
+    state_frequency = {}
+    for location in location_list:
+        location = location.split(',')
+        state_frequency.setdefault(location[len(location) - 1], 0)
+        state_frequency[location[len(location) - 1]] += 1
+    sorted_by_frequency = sorted(state_frequency.items(), key = itemgetter(1), reverse = True)
+    return sorted_by_frequency
+   
+def main():
+    input_dict = read_csv("ScriptData.csv")
+    keywords = ['BIG DATA', 'MANAGEMENT', 'MEDIA', 'DESIGN']
+    time_lists = []
+    
+#    print sort_time_period(group_up(input_dict, 'BIG DATA', 'TIME'))
+    
+    for keyword in keywords:
+        time_lists.append(sort_time_period(group_up(input_dict, keyword, 'TIME')))
+    print time_lists
+
+
+    plot_time(time_lists, keywords)
+        
+#    for keyword in ['BIG DATA', 'MANAGEMENT', 'MEDIA', 'DESIGN']:
+    location_list = group_up(input_dict, 'BIG DATA', 'LOCATION')
+    NA = plot_location(location_list, 'BIG DATA')
+    
+#    print bg_location_list
+
+if __name__ == "__main__":
+    main()
