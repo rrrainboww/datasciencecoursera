@@ -69,6 +69,15 @@ def plot_location(location_list, keyword):
    
 
 def rank_location(location_list):
+    '''
+    Parameter: a list of location for a type of job
+    
+    output: 
+    return a dictionary ranking the sum of of area distribution for this 
+    type of job from highest to lowest. key of the dictionary is the state where
+    the job appeared and value is the number of frequency of that state appeared 
+    in this type of jobs.
+    '''
     state_frequency = {}
     for location in location_list:
         location = location.split(',')
@@ -77,7 +86,15 @@ def rank_location(location_list):
     sorted_by_frequency = sorted(state_frequency.items(), key = itemgetter(1), reverse = True)
     return sorted_by_frequency
 
-def rank_website(website_list, keyword):
+def rank_website(website_list):
+    '''
+    Parameter: a list of website sources for a type of job
+    
+    return a dictionary ranking the sum of number of postings for that type of 
+    job appearing in each website from highest to lowest. key is name of the 
+    website and value is the number of frequency of that type of jobs appeared 
+    in this website
+    '''
     web_job_dict = {}
     for element in website_list:
         web_job_dict.setdefault(element, 0)
@@ -87,6 +104,21 @@ def rank_website(website_list, keyword):
         
     
 def list_of_list(input_list, keywords):
+    '''
+    Parameter: a list of list of dictionaries returned from readcsv() function
+    keywords is a list of keywords 
+    
+    
+    plot time_rank graph with x axis: a list of time range and y axis: a list of 
+    frequencies in each of the time range
+    
+    plot location_rank graph with x axis: a list of the first 10 states of the 
+    highest job postings of a specific type of job and y axis: a list of job 
+    posting frequencies for those first 10 states
+    
+    print the ranking of sum of the number of postings for each type of job 
+    appearing in each website
+    '''
     time_lists = []
     for i in range(len(keywords)):
         time_lists.append(sort_time_period(requirement_list(input_list, keywords, keywords[i], 'TIME')))
@@ -98,7 +130,7 @@ def list_of_list(input_list, keywords):
     
     for i in range(len(keywords)):
         website_list = requirement_list(input_list, keywords, keywords[i], 'SOURCE')
-        print keywords[i], ":", rank_website(website_list, keywords[i])
+        print keywords[i], ":", rank_website(website_list)
     
    
 def main():
@@ -109,3 +141,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
