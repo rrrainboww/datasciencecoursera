@@ -8,6 +8,18 @@ import csv
 from operator import itemgetter
 
 def read_csv(filename, keywords):
+    '''
+    Read CSV file as a dictionary and put each row of dictionary into four
+    sublists of a big list base on their keywords.
+    
+    Parameter: 
+        filename: a string
+        keywords: a list of keywords from the first column of the file
+        
+    Output: 
+        a list with four sublists which contains the entries from a certain
+        keyword
+    '''
     input_dict = csv.DictReader(open(filename))
     list_of_dict = [[],[],[],[]]
     for items in input_dict:
@@ -17,6 +29,19 @@ def read_csv(filename, keywords):
     return list_of_dict
     
 def requirement_list(input_list, keywords, keyword, requirement):
+    '''
+    collect all values that has the input 'requirement' as the key from a
+    sublist of a given keyword and return them as a list.
+    
+    Parameter:
+        the input list
+        keywords : a list
+        keyword: a string
+        requirement: a string
+        
+    Output:
+        a list of strings
+    '''
     result_list = []
     for items in input_list[keywords.index(keyword)]:
         if items[requirement] != '':
@@ -24,6 +49,18 @@ def requirement_list(input_list, keywords, keyword, requirement):
     return result_list
     
 def sort_time_period(time_list): 
+    '''
+    Given a list that contains times and discard the entries repersenting times
+    that are over a month. Then group the remaining entries by every 5 days.
+    There are six groups in total. Count the number of entries in each group and
+    return the numbers as a list.
+    
+    Parameter: 
+        time_list: a list that represents time periods
+    
+    Output:
+        a list that stores the frequencies of each 5-day periods.
+    '''
     result_list = [0] * 6
     #time_range1 = [1,5,10,15,20,25]
     #time_range2 = [6,11,16,21,26,31]
