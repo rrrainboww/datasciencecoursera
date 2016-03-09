@@ -9,19 +9,18 @@ from operator import itemgetter
 
 def read_csv(filename, keywords):
     input_dict = csv.DictReader(open(filename))
-    list_of_dict = [[]] * 4
+    list_of_dict = [[],[],[],[]]
     for items in input_dict:
         for i in range(len(list_of_dict)):
             if items['KEYWORD_IN'] == keywords[i]:
                 list_of_dict[i].append(items)
     return list_of_dict
     
-def requirement_list(input_list,keywords, keyword, requirement):
+def requirement_list(input_list, keywords, keyword, requirement):
     result_list = []
     for items in input_list[keywords.index(keyword)]:
         if items[requirement] != '':
             result_list.append(items[requirement])
-#    print result_list
     return result_list
     
 def sort_time_period(time_list): 
@@ -40,32 +39,34 @@ def sort_time_period(time_list):
     return result_list
     
 def plot_time(lists_of_times, keywords):
+    plt.clf()
     x_axis = ["1 to 5 days", "6 to 10 days", "11 to 15 days", "16 to 20 days", "21 to 25 days", "26 to 30 days"]
     x = [i for i in range(6)]
     plt.xticks(x, x_axis)
-#        plt.clf()
     plt.xlabel('5_day_period')
     plt.ylabel('Frequency of jobs')
-#    for j in range(len(lists_of_times)):
-    y_value = [num for num in lists_of_times[0]]
-    plt.plot(x, y_value)
+    for j in range(len(lists_of_times)):
+#    print lists_of_times[0]
+        y_value = [num for num in lists_of_times[j]]
+#    print x, y_value
+        plt.plot(x, y_value)
     plt.legend(keywords)        
     plt.savefig('time_rank.png')
-      
+     
 def plot_location(location_list, keyword):
     location_rank_list = rank_location(location_list)
-#    print location_rank_list[0:10]
     x = [i for i in range(10)]
     x_value = [name[0] for name in location_rank_list[0:10]]
     y_value = [name[1] for name in location_rank_list[0:10]]
+    plt.clf()
     plt.xticks(x, x_value)
     plt.plot(x, y_value)
     plt.legend([keyword])
     plt.xlabel('State')
     plt.ylabel('Frequency')
-    plt.savefig(keyword + 'location_rank.png')
-#    plt.show()
-    
+    plt.savefig(keyword + ' location_rank.png')
+    plt.show()
+   
 
 def rank_location(location_list):
     state_frequency = {}
@@ -75,35 +76,36 @@ def rank_location(location_list):
         state_frequency[location[len(location) - 1]] += 1
     sorted_by_frequency = sorted(state_frequency.items(), key = itemgetter(1), reverse = True)
     return sorted_by_frequency
+
+def rank_website(website_list, keyword):
+    web_job_dict = {}
+    for element in website_list:
+        web_job_dict.setdefault(element, 0)
+        web_job_dict[element] += 1
+    sort_by_website = sorted(web_job_dict.items(), key = itemgetter(1), reverse = True)
+    return sort_by_website
+        
     
 def list_of_list(input_list, keywords):
     time_lists = []
     for i in range(len(keywords)):
         time_lists.append(sort_time_period(requirement_list(input_list, keywords, keywords[i], 'TIME')))
     plot_time(time_lists, keywords)
-#    return time_lists
+    
+    for keyword in keywords:
+        location_list = requirement_list(input_list, keywords, keyword, 'LOCATION')
+        plot_location(location_list, keyword)
+    
+    for i in range(len(keywords)):
+        website_list = requirement_list(input_list, keywords, keywords[i], 'SOURCE')
+        print keywords[i], ":", rank_website(website_list, keywords[i])
     
    
 def main():
     keywords = ['BIG DATA', 'MANAGEMENT', 'MEDIA', 'DESIGN']
     input_list = read_csv("ScriptData.csv", keywords)
 
-#    print sort_time_period(group_up(input_dict, 'BIG DATA', 'TIME'))
-#    group = group_up(input_dict, 'BIG DATA', 'TIME')
-#    lst = sort_time_period(group)
-#    time_lists.append(lst)
-#    lists_of_times = list_of_list(input_dict, keywords)
     list_of_list(input_list, keywords)
-    
-
-
-#    plot_time(time_lists, keywords)
-        
-#    for keyword in ['BIG DATA', 'MANAGEMENT', 'MEDIA', 'DESIGN']:
-#    location_list = group_up(input_dict, 'BIG DATA', 'LOCATION')
-#    NA = plot_location(location_list, 'BIG DATA')
-    
-#    print bg_location_list
 
 if __name__ == "__main__":
     main()
