@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import csv
 from operator import itemgetter
 
-def read_csv(filename, keywords):
+def read_csv(filename, keys):
     '''
     Read CSV file as a dictionary and put each row of dictionary into four
     sublists of a big list base on their keywords.
@@ -24,11 +24,11 @@ def read_csv(filename, keywords):
     list_of_dict = [[],[],[],[]]
     for items in input_dict:
         for i in range(len(list_of_dict)):
-            if items['KEYWORD_IN'] == keywords[i]:
+            if items['KEYWORD_IN'] == keys[i]:
                 list_of_dict[i].append(items)
     return list_of_dict
     
-def requirement_list(input_list, keywords, keyword, requirement):
+def requirement_list(input_list, keys, keyword, requirement):
     '''
     collect all values that has the input 'requirement' as the key from a
     sublist of a given keyword and return them as a list.
@@ -43,7 +43,7 @@ def requirement_list(input_list, keywords, keyword, requirement):
         a list of strings
     '''
     result_list = []
-    for items in input_list[keywords.index(keyword)]:
+    for items in input_list[keys.index(keyword)]:
         if items[requirement] != '':
             result_list.append(items[requirement])
     return result_list
@@ -62,8 +62,6 @@ def sort_time_period(time_list):
         a list that stores the frequencies of each 5-day periods.
     '''
     result_list = [0] * 6
-    #time_range1 = [1,5,10,15,20,25]
-    #time_range2 = [6,11,16,21,26,31]
     days_list = []
     for i in time_list:
         i = i.replace('days', 'day')
@@ -75,7 +73,18 @@ def sort_time_period(time_list):
         result_list[(times - 1) / 5] += 1
     return result_list
     
-def plot_time(lists_of_times, keywords):
+def plot_time(lists_of_times, keys):
+    '''
+    Input: 
+        lists_of_times: a list that contains four lists that corresponds to
+        four keywords. Each list has six elements representing the number of
+        postings in each 5-day period. 
+        keywords: a list that contains the four keywords
+        
+    Side effect: 
+        plot the six values in each sublists and connect them. So there are 
+        four lines in the plot each corresponding to a keyword
+    '''
     plt.clf()
     x_axis = ["1 to 5 days", "6 to 10 days", "11 to 15 days", "16 to 20 days", "21 to 25 days", "26 to 30 days"]
     x = [i for i in range(6)]
@@ -83,22 +92,29 @@ def plot_time(lists_of_times, keywords):
     plt.xlabel('5_day_period')
     plt.ylabel('Frequency of jobs')
     for j in range(len(lists_of_times)):
-#    print lists_of_times[0]
         y_value = [num for num in lists_of_times[j]]
-#    print x, y_value
         plt.plot(x, y_value)
-    plt.legend(keywords)        
+    plt.legend(keys)        
     plt.savefig('time_rank.png')
      
 def plot_location(location_list, keyword):
+    '''
+    Input:
+        location_list: a list that contains the locations of all the jobs under
+        a keyword.
+        keyword: a string
+    
+    Side effect:
+        Graph the top ten states that has most number of jobs.
+    '''
     location_rank_list = rank_location(location_list)
     x = [i for i in range(10)]
     x_value = [name[0] for name in location_rank_list[0:10]]
     y_value = [name[1] for name in location_rank_list[0:10]]
     plt.clf()
     plt.xticks(x, x_value)
-    plt.plot(x, y_value)
-    plt.legend([keyword])
+    plt.bar(left = x, height = y_value, width = 0.2, align = "center")
+    plt.title(keyword)
     plt.xlabel('State')
     plt.ylabel('Frequency')
     plt.savefig(keyword + ' location_rank.png')
@@ -107,13 +123,15 @@ def plot_location(location_list, keyword):
 
 def rank_location(location_list):
     '''
-    Parameter: a list of location for a type of job
+    Collect the state name of each entry and rank the most popular state to the 
+    least popular ones.
     
-    output: 
-    return a dictionary ranking the sum of of area distribution for this 
-    type of job from highest to lowest. key of the dictionary is the state where
-    the job appeared and value is the number of frequency of that state appeared 
-    in this type of jobs.
+    Parameter:
+        location_list: a list containing entries as locations(city and state
+        and sometimes country)
+    
+    Output: 
+        a list of sorted tuples that contains the state name and its frequency
     '''
     state_frequency = {}
     for location in location_list:
@@ -125,22 +143,83 @@ def rank_location(location_list):
 
 def rank_website(website_list):
     '''
-    Parameter: a list of website sources for a type of job
+    Create a dictionary that stores the name of websites and the number of
+    posting on them and return it.
     
-    return a dictionary ranking the sum of number of postings for that type of 
-    job appearing in each website from highest to lowest. key is name of the 
-    website and value is the number of frequency of that type of jobs appeared 
-    in this website
+    Parameter:
+        website_list: a list of website
+    
+    Output:
+        a dictionary of number of job posting on each website
     '''
     web_job_dict = {}
     for element in website_list:
+        element = element.replace('.com', '')
         web_job_dict.setdefault(element, 0)
         web_job_dict[element] += 1
-    sort_by_website = sorted(web_job_dict.items(), key = itemgetter(1), reverse = True)
-    return sort_by_website
+    return web_job_dict
+   
+def plot_website(list_of_webdicts, keys):
+    '''
+    Input: 
+        list_of_webdicts: a list that contains four dictionaries. Each
+        dictionary contains the keys as the name of website and values as the 
+        number of posting of the website.
+        keys: a list that contains the four keywords
         
+    Side effect: draw four bar graphs for each website and compare number of 
+        posting for each of them with respect of different keywords
+    '''
+    list_of_webdicts = fill_empty_websites(list_of_webdicts)
+    x_axis = list_of_webdicts.pop()
+    width = 0.1
+    plt.clf()
+    x_list = []
+    y_list = []
+    for i in range(len(list_of_webdicts)):
+        x_value = []
+        y_value = []
+        for j in range(len(x_axis)):
+            x_value.append(j + width * i)
+            y_value.append(list_of_webdicts[i][x_axis[j]])
+        x_list.append(x_value)
+        y_list.append(y_value)
+    plt.bar(left = x_list[0], height = y_list[0], width = width, color = '#0072BC')
+    plt.bar(left = x_list[1], height = y_list[1], width = width, color = '#ED1C24')
+    plt.bar(left = x_list[2], height = y_list[2], width = width, color = '#7B68EE')
+    plt.bar(left = x_list[3], height = y_list[3], width = width, color = '#EEE685')
+    plt.xticks([i + 2 * width for i in range(len(x_axis))], x_axis)
+    plt.legend(keys) 
+    plt.title("Number of posting on each website")
+    plt.savefig('website_postings.png')
+    plt.show()
+ 
+def fill_empty_websites(list_of_webdicts):
+    '''
+    Given a list of four dictionaries and pick out all the keys in them. Throw
+    those keys back in each dictionary. If a dictionary do not have certain
+    keys, set its value to 0.
     
-def list_of_list(input_list, keywords):
+    Parameter:
+        list_of_webdicts: a list of four dictionaries
+        
+    Output: 
+        The modified list_of_webdicts and add a list of all the keys showed up
+        in the dictionaries at the end of list_of_webdicts
+    '''
+    website_set = set()
+    for dic in list_of_webdicts:
+        for items in dic.keys():
+            website_set.add(items)       
+    for element in website_set:
+        for i in range(len(list_of_webdicts)):
+            list_of_webdicts[i].setdefault(element, 0)
+    web_list = list(website_set)
+    web_list.sort()
+    list_of_webdicts.append(web_list)
+    return list_of_webdicts
+                 
+def run_the_program(input_list, keys):
     '''
     Parameter: a list of list of dictionaries returned from readcsv() function
     keywords is a list of keywords 
@@ -155,28 +234,33 @@ def list_of_list(input_list, keywords):
     
     print the ranking of sum of the number of postings for each type of job 
     appearing in each website
+    
+    plot number of postings on each website: names of different websites on
+    axis, and number of postings on y_axis
     '''
     time_lists = []
-    for i in range(len(keywords)):
-        time_lists.append(sort_time_period(requirement_list(input_list, keywords, keywords[i], 'TIME')))
-    plot_time(time_lists, keywords)
+    for i in range(len(keys)):
+        time_lists.append(sort_time_period(requirement_list(input_list, keys, keys[i], 'TIME')))
+    plot_time(time_lists, keys)
     
-    for keyword in keywords:
-        location_list = requirement_list(input_list, keywords, keyword, 'LOCATION')
+    for keyword in keys:
+        location_list = requirement_list(input_list, keys, keyword, 'LOCATION')
         plot_location(location_list, keyword)
     
-    for i in range(len(keywords)):
-        website_list = requirement_list(input_list, keywords, keywords[i], 'SOURCE')
-        print keywords[i], ":", rank_website(website_list)
+    list_of_webdicts = []
+    for i in range(len(keys)):
+        website_list = requirement_list(input_list, keys, keys[i], 'SOURCE')
+        web_job_dict = rank_website(website_list)
+        print keys[i], ":", sorted(web_job_dict.items(), key = itemgetter(1), reverse = True)
+        list_of_webdicts.append(web_job_dict)
+    plot_website(list_of_webdicts, keys)
     
    
 def main():
-    keywords = ['BIG DATA', 'MANAGEMENT', 'MEDIA', 'DESIGN']
-    input_list = read_csv("ScriptData.csv", keywords)
+    keys = ['BIG DATA', 'MANAGEMENT', 'MEDIA', 'DESIGN']
+    input_list = read_csv("ScriptData.csv", keys)
 
-    list_of_list(input_list, keywords)
+    run_the_program(input_list, keys)
 
 if __name__ == "__main__":
     main()
-
-
