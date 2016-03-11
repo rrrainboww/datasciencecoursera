@@ -254,12 +254,19 @@ def run_the_program(input_list, keys):
         print keys[i], ":", sorted(web_job_dict.items(), key = itemgetter(1), reverse = True)
         list_of_webdicts.append(web_job_dict)
     plot_website(list_of_webdicts, keys)
-    
+
+def test():
+    assert sort_time_period(['1 day', '3 days', '7 days', '25 days', '16 days']) == [2, 1, 0, 1, 1, 0]
+    assert sort_time_period(['2 days', '6 days', '27 days', '10 days', '22 days']) == [1, 2, 0, 0, 1, 1]
+    assert rank_location(['CA', 'NY', 'WA', 'NY', 'MA', 'CA', 'CA']) == [('CA', 3), ('NY', 2), ('MA', 1), ('WA', 1)]
+    assert rank_website(['dice','simplyhired','ziprecruiter','dice','ziprecruiter','startuphire','ziprecruiter']) == {'dice': 2, 'simplyhired': 1, 'startuphire': 1, 'ziprecruiter': 3}
+       
    
 def main():
     keys = ['BIG DATA', 'MANAGEMENT', 'MEDIA', 'DESIGN']
     input_list = read_csv("ScriptData.csv", keys)
-
+    test()
+    assert len(requirement_list(input_list, keys,'BIG DATA', 'SOURCE')) == 2000
     run_the_program(input_list, keys)
 
 if __name__ == "__main__":
