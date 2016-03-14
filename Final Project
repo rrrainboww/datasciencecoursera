@@ -17,15 +17,17 @@ def read_csv(filename, keys):
         keywords: a list of keywords from the first column of the file
         
     Output: 
-        a list with four sublists which contains the entries from a certain
-        keyword
+        a list with four lists of dictionaries which contains the entries from
+        a certain keyword
     '''
     input_dict = csv.DictReader(open(filename))
     list_of_dict = [[],[],[],[]]
+    
     for items in input_dict:
         for i in range(len(list_of_dict)):
             if items['KEYWORD_IN'] == keys[i]:
                 list_of_dict[i].append(items)
+                
     return list_of_dict
     
 def requirement_list(input_list, keys, keyword, requirement):
@@ -43,6 +45,7 @@ def requirement_list(input_list, keys, keyword, requirement):
         a list of strings
     '''
     result_list = []
+    
     for items in input_list[keys.index(keyword)]:
         if items[requirement] != '':
             result_list.append(items[requirement])
@@ -63,11 +66,12 @@ def sort_time_period(time_list):
     '''
     result_list = [0] * 6
     days_list = []
-    for i in time_list:
-        i = i.replace('days', 'day')
-        i = i.split()
-        if 'day' in i:         
-            days_list.append(int(i[0]))
+    
+    for time in time_list:
+        time = time.replace('days', 'day')
+        time = time.split()
+        if 'day' in time:         
+            days_list.append(int(time[0]))
     
     for times in days_list:
         result_list[(times - 1) / 5] += 1
@@ -95,7 +99,7 @@ def plot_time(lists_of_times, keys):
         y_value = [num for num in lists_of_times[j]]
         plt.plot(x, y_value)
     plt.legend(keys)        
-    plt.savefig('time_rank.png')
+    plt.savefig('Time_Rank.png')
      
 def plot_location(location_list, keyword):
     '''
@@ -117,8 +121,7 @@ def plot_location(location_list, keyword):
     plt.title(keyword)
     plt.xlabel('State')
     plt.ylabel('Frequency')
-    plt.savefig(keyword + ' location_rank.png')
-    plt.show()
+    plt.savefig(keyword + ' Location_Rank.png')
    
 
 def rank_location(location_list):
@@ -134,7 +137,9 @@ def rank_location(location_list):
         a list of sorted tuples that contains the state name and its frequency
     '''
     state_frequency = {}
+    
     for location in location_list:
+        location = location.replace(', USA', '')
         location = location.split(',')
         state_frequency.setdefault(location[len(location) - 1], 0)
         state_frequency[location[len(location) - 1]] += 1
@@ -176,6 +181,7 @@ def plot_website(list_of_webdicts, keys):
     plt.clf()
     x_list = []
     y_list = []
+    
     for i in range(len(list_of_webdicts)):
         x_value = []
         y_value = []
@@ -189,10 +195,9 @@ def plot_website(list_of_webdicts, keys):
     plt.bar(left = x_list[2], height = y_list[2], width = width, color = '#7B68EE')
     plt.bar(left = x_list[3], height = y_list[3], width = width, color = '#EEE685')
     plt.xticks([i + 2 * width for i in range(len(x_axis))], x_axis)
-    plt.legend(keys) 
+    plt.legend(keys, loc='upper center') 
     plt.title("Number of posting on each website")
-    plt.savefig('website_postings.png')
-    plt.show()
+    plt.savefig('Website_Postings.png')
  
 def fill_empty_websites(list_of_webdicts):
     '''
@@ -208,9 +213,12 @@ def fill_empty_websites(list_of_webdicts):
         in the dictionaries at the end of list_of_webdicts
     '''
     website_set = set()
+    
+    # create a set that contains all websites from any keyword
     for dic in list_of_webdicts:
         for items in dic.keys():
-            website_set.add(items)       
+            website_set.add(items)  
+                 
     for element in website_set:
         for i in range(len(list_of_webdicts)):
             list_of_webdicts[i].setdefault(element, 0)
@@ -254,17 +262,17 @@ def run_the_program(input_list, keys):
         print keys[i], ":", sorted(web_job_dict.items(), key = itemgetter(1), reverse = True)
         list_of_webdicts.append(web_job_dict)
     plot_website(list_of_webdicts, keys)
-
+    
 def test():
     assert sort_time_period(['1 day', '3 days', '7 days', '25 days', '16 days']) == [2, 1, 0, 1, 1, 0]
     assert sort_time_period(['2 days', '6 days', '27 days', '10 days', '22 days']) == [1, 2, 0, 0, 1, 1]
     assert rank_location(['CA', 'NY', 'WA', 'NY', 'MA', 'CA', 'CA']) == [('CA', 3), ('NY', 2), ('MA', 1), ('WA', 1)]
     assert rank_website(['dice','simplyhired','ziprecruiter','dice','ziprecruiter','startuphire','ziprecruiter']) == {'dice': 2, 'simplyhired': 1, 'startuphire': 1, 'ziprecruiter': 3}
-       
    
 def main():
     keys = ['BIG DATA', 'MANAGEMENT', 'MEDIA', 'DESIGN']
     input_list = read_csv("ScriptData.csv", keys)
+    
     test()
     assert len(requirement_list(input_list, keys,'BIG DATA', 'SOURCE')) == 2000
     run_the_program(input_list, keys)
